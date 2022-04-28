@@ -1,11 +1,18 @@
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
+import { remark } from 'remark'
+import html from 'remark-html'
 
 export type PostMetadata = {
   id: string,
   date: string,
   title: string
+}
+
+export type PostData = {
+  metadata: PostMetadata,
+  contentHtml: string
 }
 
 const postsDirectory = path.join(process.cwd(), 'posts')
@@ -22,17 +29,10 @@ export function getSortedPostsData() : PostMetadata[] {
         let matterResult = matter(fileContents)
         
 
-        // Using TypeScript, these constants have to be defined
-        // before the return. 
-        // This will be good to get clarification on since there
-        // must be a better way to return values necessary
-        // for the type
-        const date = matterResult.data.date ?? "Missing Date"
-        const title = matterResult.data.title ?? "Missing Title"
         return {
             id,
-            date,
-            title
+            date : (matterResult.data.date ?? "Missing Date"),
+            title : (matterResult.data.title ?? "Missing Title")
         }
     })
 
@@ -45,4 +45,38 @@ export function getSortedPostsData() : PostMetadata[] {
             return 0
         }
     })
+}
+
+export function getAllPostIds() {
+    const fileNames = fs.readdirSync(postsDirectory)
+
+    return fileNames.map(fileName => {
+        return {
+            params: {
+                id: fileName.replace(/\.md$/, '')
+            }
+        }
+    })
+}
+
+export async function getPostData(id: string) : Promise<PostData> {
+    const fullPath = path.join(postsDirectory, `${id}.md`)
+    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    
+    const matterResult = matter(fileContents)
+
+    const processedContent = await remark()
+        .use(html)
+        .process(matterResult.content)
+
+    const contentHtml = processedContent.toString()
+        
+    return {
+        metadata: {
+            id, 
+            date: matterResult.data.date, 
+            title: matterResult.data.title
+        },
+        contentHtml
+    }
 }

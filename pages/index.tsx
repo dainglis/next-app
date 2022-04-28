@@ -2,11 +2,13 @@ import type { NextPage } from 'next'
 import type { PostMetadata } from '../lib/posts'
 
 import Head from 'next/head'
+import Link from 'next/link'
 import Layout, {siteTitle} from '../components/layout'
+import Date from '../components/date'
 import { getSortedPostsData } from '../lib/posts'
 
 import utilStyle from '../styles/utils.module.css'
-import Link from 'next/link'
+
 
 type Props = {
   allPostsData?: PostMetadata[]
@@ -40,7 +42,7 @@ const Home: NextPage = ({ allPostsData }: Props ) => {
     
       <h1>Blog</h1>
       <ul className={utilStyle.list}>
-        {allPostsData?.map(({ id, date, title}) => (
+        {allPostsData?.map(({ id, date, title} : PostMetadata) => (
           <li className={utilStyle.listItem} key={id}>
             <Link href={`posts/${id}`}>
               <a className={utilStyle.description}>
@@ -48,7 +50,9 @@ const Home: NextPage = ({ allPostsData }: Props ) => {
               </a>
             </Link>
             <br />
-            <span className={utilStyle.lightText}>{date}</span>
+            <small className={utilStyle.lightText}>
+              <Date dateString={date} />
+            </small>
           </li>
         ))}
       </ul>
