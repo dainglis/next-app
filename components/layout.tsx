@@ -71,6 +71,9 @@ const Layout = ({ children, home }: Props) => {
                     <p className={utilStyle.card}>← Back to home</p>
                 </Link>
             )}
+            <footer className={utilStyle.footer}>See the source code on{` `}
+                <a href="https://github.com/dainglis/next-app">GitHub</a>
+            </footer>
         </div>
     ) 
 }
